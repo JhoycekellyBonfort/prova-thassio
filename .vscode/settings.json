@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "c:\\laragon\\www\\trab-tassio-breno\\venv\\Scripts\\python.exe",
+    "python.formatting.provider": "black"
+}

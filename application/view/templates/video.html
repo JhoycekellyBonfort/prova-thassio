@@ -1,0 +1,77 @@
+{%extends 'base.html'%} {%block body%}
+{% if video%}
+<div class="row container">
+    <div class="col-md-8">
+        <video style="width: 100%;" controls>
+            <source poster="/static/{{ video.getThumb() }}" src="/static/{{ video.getSrc() }}" type="video/mp4">
+            <source poster="/static/{{ video.getThumb() }}" src="/static/{{ video.getSrc() }}" type="video/ogg">
+        </video>
+        <h3>{{ video.getTitulo() }}</h3>
+        <p>{{ video.getDescricao() }}</p>
+        <span id="curtidas">{{ video.getCurtidas() }}</span> curtidas - {{ video.getVisualizacoes() }} views -
+        {{ video.getPublicacao() }}
+    </div>
+    <div class="col-md-4" id="comentarios">
+        {%for comentario in comentarios%}
+        <p id="id_comentario-{{ comentario.getId() }}" style="padding: 10px;width: 100%;"><span>Comentario:</span>
+            {{ comentario.getTexto() }}</p>
+        {%endfor%}
+    </div>
+    <button class="btn btn-dark" id="botao-curtida" onclick="curtir_video()">Curtir</button>
+
+</div>
+
+
+<div class="col-md-12">
+
+    <div class="row " style="padding-top: 10px;">
+        <div class="col-md-10">
+            <input class="form-control" id="comentario"></input>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-dark" id="enviar_comentario" onclick="comentar_video()">
+                Enviar</button>
+        </div>
+    </div>
+</div>
+{%else%}
+Vídeo não encontrado
+{%endif%}
+
+<script>
+    var curtir_video = function () {
+        var botao_curtida = $('#botao-curtida');
+        var xhttp = new XMLHttpRequest();
+
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                data = this.response;
+                data = JSON.parse(data)
+                document.getElementById('curtidas').innerHTML = data.curtidas
+            }
+        }
+        xhttp.open("GET", "/video/curtir?id_video=" + {{ video.getId() }}, true);
+    xhttp.send();
+    }
+
+    var comentar_video = function () {
+        var btn_comentario = document.getElementById('enviar_comentario')
+        var comentario = document.getElementById('comentario')
+        var xhttp = new XMLHttpRequest();
+
+        xhttp.onreadystatechange = function () {
+            console.log(this.response)
+            if (this.readyState == 4 && this.status == 200) {
+                data = this.response;
+                data = JSON.parse(data) //CONVERTE RETORNO PARA JSON
+                $('#comentarios').append(`<p id="id_comentario-` + data.id + `" style="background-color: white;  padding: 10px; border-radius: 20px; width: 100%;"><span\>Comentario:</span> ` + data.text + `
+                    </p>`); //ADICIONA NOVO COMENTARIO NO FINAL DA LISTA DE COMENTARIOS
+                comentario.value = ''; //ZERA A CAIXA DE TEXTO DO COMENTARIO
+            }
+        }
+        xhttp.open("GET", "/video/comentario?id_video=" + {{ video.getId() }} + "&comentario=" + comentario.value, true);
+    xhttp.send();
+    }
+
+</script>
+{%endblock%}

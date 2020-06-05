@@ -1,0 +1,67 @@
+{%extends 'base.html'%} {%block body%}
+<div class="row">
+  <h1 style="color: black;" class="m-auto">Bem vindo ao WebTheater</h1>
+</div>
+<div class="row" style="margin-top: 30px;">
+  <h3>Videos mais curtidos</h3>
+</div>
+<div class="row">
+
+  {% for video in videos_mais_curtidos[:3]%}
+  <div class="col-md-4">
+    <a href="categoria/{{ video.getIdCategoria() }}/video/{{ video.getId() }}">
+      <img class="d-block w-100" height="200" width="100" src="static/{{ video.getThumb() }}"
+        alt="{{ video.getTitulo() }}">
+        <h3>{{ video.getTitulo() }}</h3>
+        {{ video.getCurtidas() }} curtidas - {{ video.getVisualizacoes() }} views - {{ video.getPublicacao() }}
+    </a>
+  </div>
+  {%endfor%}
+</div>
+<hr>
+<div class="row" style="margin-top: 30px;">
+  <div class="col-md-4">
+    <input class="form-control " type="text" placeholder="Encontrar vídeo" id="buscar"
+      onkeyup="buscarVideo(this.value)">
+  </div>
+</div>
+<div class="row" style="margin-top: 30px;" id="resultado-busca">
+
+</div>
+<script type="application/javascript">
+  var buscarVideo = function (texto) {
+    var xhttp = new XMLHttpRequest();
+    if (texto == '') {
+      $('#resultado-busca').html('')
+      return false
+    }
+    xhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+        data = this.response;
+        data = JSON.parse(data)
+        if (data.length > 0) {
+          $('#resultado-busca').html('')
+          for (let i = 0; i < data.length; i++) {
+            const video = data[i];
+            $('#resultado-busca').append(`
+            <div class="col-md-4">
+              <a href="categoria/`+ video._id_categoria + `/video/` + video._id + `">
+                <img class="d-block w-100" height="200" width="100" src="static/`+ video._thumb + `"
+                  alt="`+ video._titulo + `">
+                  `+ video._titulo + `<br>
+                  `+ video._descricao + `<br>
+                  `+ video._curtidas + ` curtidas - ` + video._visualizacoes + ` views -` + video._publicacao + `
+              </a>
+            </div>`)
+          }
+        } else {
+          $('#videos-encontrados').html('<span class="alert alert-danger">Nenhum resultado encontrado.</span>')
+          $('#resultado-busca').html('')
+        }
+      }
+    };
+    xhttp.open("GET", "/video/buscar?texto=" + texto + "", true);
+    xhttp.send();
+  }
+</script>
+{% endblock %}
